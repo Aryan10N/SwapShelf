@@ -219,9 +219,9 @@ Pull requests are welcome. For major changes, open an issue first to discuss wha
 ## 🧑‍💻 Author
 
 - [Aryan Kumar](https://github.com/Aryan10N)
+- Flutter App Developer & College Student
 - **Utkarsh Aditya** – Developer
 - **Vaigainathan** – Developer
-- Flutter App Developer & College Student
 
 ---
 
