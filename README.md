@@ -13,8 +13,6 @@ among students within the college campus. It's not just a convenience tool—it�
 building a helpful, sustainable student community.
 
 
-**SwapShelf** is a mobile application designed to enable college students to **lend and borrow physical books** directly from each other — a digital peer-to-peer campus library. Built using **Flutter**, **Dart**, and **Firebase**, it helps save money, promote sustainability, and build a collaborative learning environment.
-
 ---
 
 ## 🚀 Features
