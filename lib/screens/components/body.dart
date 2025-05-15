@@ -1,25 +1,40 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:swap_shelf/screens/components/background.dart';
 
 class Body extends StatelessWidget {
-  const Body({super.key});
-
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;  // This size provide us total height and width of our screen
-    return Container(
-      height: size.height,
-      width: double.infinity,
-      child: Stack(
-        alignment: Alignment.center,
+    var size = MediaQuery.of(context).size;
+    return Background(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Image.asset(
-          "assets/images/main_top.png",
-          width: size.width * 0.3,
-        ),
-        ),
+          Text(
+              "SWAP SHELF",
+              style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SvgPicture.asset(
+              "assets/icons/chat.svg",
+              height: size.height * 0.3),
+          SizedBox(
+            width: 250,
+            child: ElevatedButton(
+                onPressed: () {},
+                child: Text("LOGIN"),
+            ),
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            width: 250,
+            child: ElevatedButton(
+                onPressed: () {},
+                child: Text("SIGNUP",
+                ),
+            ),
+          ),
         ],
       ),
     );
