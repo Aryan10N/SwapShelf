@@ -1,8 +1,10 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:swap_shelf/screens/components/background.dart';
+import 'package:swap_shelf/components/background.dart';
+import 'package:swap_shelf/screens/login/login_screen.dart';
+
+import '../screens/signup/signup_page.dart';
 
 class Body extends StatelessWidget {
   @override
@@ -22,7 +24,12 @@ class Body extends StatelessWidget {
           SizedBox(
             width: 250,
             child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                  context,
+                      MaterialPageRoute(builder: (context) => LoginScreen())
+                  );
+                },
                 child: Text("LOGIN"),
             ),
           ),
@@ -30,8 +37,14 @@ class Body extends StatelessWidget {
           SizedBox(
             width: 250,
             child: ElevatedButton(
-                onPressed: () {},
-                child: Text("SIGNUP",
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignupPage())
+                  );
+                },
+                child: Text(
+                  "SIGNUP",
                 ),
             ),
           ),
