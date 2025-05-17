@@ -149,7 +149,7 @@ lib/
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/your-username/swapshelf.git
+   git clone https://github.com/Aryan10N/swapshelf.git
    cd swapshelf
    ```
 
