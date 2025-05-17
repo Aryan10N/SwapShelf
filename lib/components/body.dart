@@ -40,7 +40,7 @@ class Body extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SignupPage())
+                      MaterialPageRoute(builder: (context) => SignUpScreen())
                   );
                 },
                 child: Text(

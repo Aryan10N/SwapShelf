@@ -1,4 +1,4 @@
-// File: lib/screens/welcome/components/body.dart
+// File: lib/screens/welcome/components/login_form.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // If you use SVGs for background or logo
 import 'package:swap_shelf/screens/login/login_screen.dart';   // <<<--- IMPORTANT: Import LoginScreen
@@ -100,7 +100,7 @@ class Body extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) {
                               // Ensure you have SignUpScreen created and imported
-                              return SignupPage(); // Navigate to SignUpScreen
+                              return SignUpScreen(); // Navigate to SignUpScreen
                             },
                           ),
                         );
