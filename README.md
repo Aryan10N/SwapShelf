@@ -132,7 +132,9 @@ lib/
  ┣ models/
  ┣ providers/
  ┣ screens/
- ┃ ┣ auth/
+ ┃ ┣ welcomepage/
+ ┃ ┣ login/
+ ┃ ┣ signup/
  ┃ ┣ home/
  ┃ ┣ book/
  ┃ ┗ profile/
