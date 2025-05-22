@@ -1,6 +1,6 @@
-// File: lib/widgets/social_icon_button.dart (or similar)
+
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // If using SVG icons
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SocialIconButton extends StatelessWidget {
   final String iconPath;
@@ -17,7 +17,7 @@ class SocialIconButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(12), // Adjust padding
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(width: 1, color: Colors.grey.shade300),
           shape: BoxShape.circle,
@@ -25,11 +25,9 @@ class SocialIconButton extends StatelessWidget {
         // If using SVGs:
         child: SvgPicture.asset(
           iconPath,
-          height: 30, // Adjust size
-          width: 30,  // Adjust size
+          height: 30,
+          width: 30,
         ),
-        // If using IconData (e.g., from FontAwesome):
-        // child: Icon(iconData, size: 30, color: Colors.black),
       ),
     );
   }

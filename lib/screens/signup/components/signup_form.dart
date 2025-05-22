@@ -42,7 +42,6 @@ class SignUpForm extends StatelessWidget {
               ),
             ),
           ),
-          // ... (likely below your email/password form and signup button)
 
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -63,33 +62,29 @@ class SignUpForm extends StatelessWidget {
             children: <Widget>[
               // Google Button
               SocialIconButton(
-                iconPath: "assets/icons/google-plus.svg", // Replace with your asset path
+                iconPath: "assets/icons/google-plus.svg",
                 onTap: () {
-                 //  _signInWithGoogle(); // We'll define this function later
                 },
               ),
               SizedBox(width: 20),
 
               // Facebook Button
               SocialIconButton(
-                iconPath: "assets/icons/facebook.svg", // Replace with your asset path
+                iconPath: "assets/icons/facebook.svg",
                 onTap: () {
-                  // _signInWithFacebook(); // We'll define this function later
                 },
               ),
               SizedBox(width: 20),
 
               // Twitter Button
               SocialIconButton(
-                iconPath: "assets/icons/twitter.svg", // Replace with your asset path
+                iconPath: "assets/icons/twitter.svg",
                 onTap: () {
-                 //  _signInWithTwitter(); // We'll define this function later
                 },
               ),
             ],
           ),
 
-          // ... (rest of your signup page, e.g., "Already have an account?")
           const SizedBox(height: defaultPadding / 2),
           ElevatedButton(
             onPressed: () {},
