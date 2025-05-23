@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "142478525553",
+    "project_id": "swapshelf-58506",
+    "storage_bucket": "swapshelf-58506.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142478525553:android:0e99ac27b9708863b4c7d0",
+        "android_client_info": {
+          "package_name": "com.example.swap_shelf"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByIzSaXoaKSG37ltsp_zGZmT0KNDXXFb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
