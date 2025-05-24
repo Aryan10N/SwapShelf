@@ -9,7 +9,7 @@ import '../../services/firebase_service.dart';
 class BookDetailsScreen extends StatelessWidget {
   final Book book;
 
-  const BookDetailsScreen({Key? key, required this.book}) : super(key: key);
+  const BookDetailsScreen({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {

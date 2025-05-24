@@ -1,3 +1,10 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'flutter'
+}
+
+
 buildscript {
     ext.kotlin_version = '1.7.10'
     repositories {
@@ -10,6 +17,10 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:google-services:4.4.0'
     }
+}
+
+plugins {
+    id "dev.flutter.flutter-gradle-plugin"
 }
 
 allprojects {
@@ -30,3 +41,4 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 } 
+

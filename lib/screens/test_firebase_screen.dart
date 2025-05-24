@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TestFirebaseScreen extends StatefulWidget {
-  const TestFirebaseScreen({Key? key}) : super(key: key);
+  const TestFirebaseScreen({super.key});
 
   @override
   State<TestFirebaseScreen> createState() => _TestFirebaseScreenState();

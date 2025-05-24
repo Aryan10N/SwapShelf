@@ -5,7 +5,7 @@ import '../../services/firebase_service.dart';
 import '../../screens/swap/swap_request_details_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({Key? key}) : super(key: key);
+  const NotificationsScreen({super.key});
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();

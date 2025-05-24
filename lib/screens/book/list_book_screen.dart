@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class ListBookScreen extends StatefulWidget {
-  const ListBookScreen({Key? key}) : super(key: key);
+  const ListBookScreen({super.key});
 
   @override
   State<ListBookScreen> createState() => _ListBookScreenState();

@@ -9,9 +9,9 @@ class SwapRequestDetailsScreen extends StatefulWidget {
   final String swapRequestId;
 
   const SwapRequestDetailsScreen({
-    Key? key,
+    super.key,
     required this.swapRequestId,
-  }) : super(key: key);
+  });
 
   @override
   State<SwapRequestDetailsScreen> createState() => _SwapRequestDetailsScreenState();

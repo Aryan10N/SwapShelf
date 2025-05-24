@@ -1,34 +1,57 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:swap_shelf/components/background.dart';
+import 'package:swap_shelf/screens/login/login_screen.dart';
 
-import '../../../constants.dart';
+import '../screens/signup/signup_screen.dart';
 
-class LoginScreenTopImage extends StatelessWidget {
-  const LoginScreenTopImage({
-    super.key,
-  });
+class Body extends StatelessWidget {
+  const Body({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Text(
-          "LOGIN",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: defaultPadding * 2),
-        Row(
-          children: [
-            const Spacer(),
-            Expanded(
-              flex: 8,
-              child: SvgPicture.asset("assets/icons/login.svg"),
+    var size = MediaQuery.of(context).size;
+    return Background(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+              "SWAP SHELF",
+              style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SvgPicture.asset(
+              "assets/icons/chat.svg",
+              height: size.height * 0.3),
+          SizedBox(
+            width: 250,
+            child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                  context,
+                      MaterialPageRoute(builder: (context) => LoginScreen())
+                  );
+                },
+                child: Text("LOGIN"),
             ),
-            const Spacer(),
-          ],
-        ),
-        const SizedBox(height: defaultPadding * 2),
-      ],
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            width: 250,
+            child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignUpScreen())
+                  );
+                },
+                child: Text(
+                  "SIGNUP",
+                ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -3,7 +3,7 @@ import 'package:swap_shelf/models/book.dart';
 import 'package:swap_shelf/widgets/book_item.dart';
 
 class HomepageScreen extends StatefulWidget {
-  const HomepageScreen({Key? key}) : super(key: key);
+  const HomepageScreen({super.key});
 
   @override
   State<HomepageScreen> createState() => _HomepageScreenState();

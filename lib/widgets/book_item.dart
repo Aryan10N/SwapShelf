@@ -6,7 +6,7 @@ class BookItem extends StatefulWidget {
   final Book book;
   final bool darkMode;
 
-  const BookItem({Key? key, required this.book, this.darkMode = false}) : super(key: key);
+  const BookItem({super.key, required this.book, this.darkMode = false});
 
   @override
   State<BookItem> createState() => _BookItemState();
