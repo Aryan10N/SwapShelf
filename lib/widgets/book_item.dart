@@ -1,143 +1,127 @@
 // lib/widgets/book_item.dart
 import 'package:flutter/material.dart';
 import 'package:swap_shelf/models/book.dart';
+import 'package:swap_shelf/screens/book_details_screen.dart';
 
-class BookItem extends StatefulWidget {
+class BookItem extends StatelessWidget {
   final Book book;
   final bool darkMode;
 
-  const BookItem({Key? key, required this.book, this.darkMode = false}) : super(key: key);
-
-  @override
-  State<BookItem> createState() => _BookItemState();
-}
-
-class _BookItemState extends State<BookItem> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  bool _isHovering = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 150),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.03).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const BookItem({
+    super.key,
+    required this.book,
+    this.darkMode = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = widget.darkMode ? const Color(0xFF23243A) : Colors.white;
     return GestureDetector(
-      onTapDown: (_) {
-        _controller.forward();
-        setState(() => _isHovering = true);
-      },
-      onTapUp: (_) {
-        _controller.reverse();
-        setState(() => _isHovering = false);
-      },
-      onTapCancel: () {
-        _controller.reverse();
-        setState(() => _isHovering = false);
-      },
       onTap: () {
-      },
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: _isHovering
-                    ? widget.book.color.withOpacity(0.3)
-                    : Colors.black12,
-                blurRadius: _isHovering ? 8 : 3,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BookDetailsScreen(book: book),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: darkMode ? const Color(0xFF23243A) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 4,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 child: AspectRatio(
-                  aspectRatio: 0.75,
+                  aspectRatio: 2/3,
                   child: Image.network(
-                    widget.book.imageUrl,
+                    book.imageUrl,
                     fit: BoxFit.cover,
-                    width: double.infinity,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: widget.book.color.withOpacity(0.7),
+                        color: book.color,
                         child: const Center(
-                          child: Icon(Icons.book, size: 36, color: Colors.white),
+                          child: Icon(
+                            Icons.book,
+                            size: 50,
+                            color: Colors.white,
+                          ),
                         ),
                       );
                     },
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 6, 8, 2),
-                child: Text(
-                  widget.book.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
-                child: Text(
-                  widget.book.author,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.white70,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: widget.book.available ? Colors.green : Colors.red,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    widget.book.available ? 'Available' : 'Borrowed',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          book.title,
+                          style: TextStyle(
+                            color: darkMode ? Colors.white : Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          book.author,
+                          style: TextStyle(
+                            color: darkMode ? Colors.white70 : Colors.black54,
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                  ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: book.available
+                            ? Colors.green.withOpacity(0.2)
+                            : Colors.red.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        book.available ? 'Available' : 'Not Available',
+                        style: TextStyle(
+                          color: book.available ? Colors.green : Colors.red,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

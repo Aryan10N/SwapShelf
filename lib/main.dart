@@ -12,14 +12,21 @@ import 'package:swap_shelf/screens/test_firebase_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:swap_shelf/providers/auth_provider.dart' as app_auth;
 import 'package:swap_shelf/providers/book_provider.dart';
+import 'package:swap_shelf/screens/profile/profile_screen.dart';
 
-void main() async { // Make main async
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter bindings are initialized
+void main() async {
+  print('main: Starting app initialization'); // Debug print
+  WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase with options
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  print('main: Initializing Firebase'); // Debug print
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('main: Firebase initialized successfully'); // Debug print
+  } catch (e) {
+    print('main: Error initializing Firebase: $e'); // Debug print
+  }
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -27,6 +34,7 @@ void main() async { // Make main async
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+  print('main: Running app'); // Debug print
   runApp(const MyApp());
 }
 
@@ -35,13 +43,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('MyApp: Building app widget'); // Debug print
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => app_auth.AuthProvider()),
         ChangeNotifierProvider(create: (_) => BookProvider()),
       ],
       child: MaterialApp(
-        title: 'SwapShelf',
+        title: 'Swap Shelf',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue, // Consider using a Material 3 color scheme
@@ -89,30 +98,16 @@ class MyApp extends StatelessWidget {
         ),
 
         // --- Crucial Part: Handle Initial Route Based on Auth State ---
-        home: Consumer<app_auth.AuthProvider>(
-          builder: (context, authProvider, _) {
-            if (authProvider.isLoading) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-            
-            if (authProvider.isAuthenticated) {
-              return const HomepageScreen();
-            }
-            
-            return const WelcomeScreen(); // Changed from TestFirebaseScreen to WelcomeScreen
-          },
-        ),
+        home: const WelcomeScreen(),
         // --- End of Crucial Part ---
 
         // Define your named routes for easy navigation
         routes: {
-          '/welcome': (context) => const WelcomeScreen(),
           '/login': (context) => const LoginScreen(),
           '/signup': (context) => const SignUpScreen(),
           '/home': (context) => const HomepageScreen(),
-          '/add-book': (context) => const AddBookScreen(),
+          '/add_book': (context) => const AddBookScreen(),
+          '/profile': (context) => const ProfileScreen(),
           '/test-firebase': (context) => const TestFirebaseScreen(),
           // Add other routes as needed
         },

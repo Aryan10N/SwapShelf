@@ -5,6 +5,7 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('WelcomeScreen: Building welcome screen'); // Debug print
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -33,13 +34,15 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 48),
               ElevatedButton(
                 onPressed: () {
+                  print('WelcomeScreen: Get Started button pressed'); // Debug print
                   Navigator.pushNamed(context, '/login');
                 },
-                child: const Text('Login'),
+                child: const Text('Get Started'),
               ),
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: () {
+                  print('WelcomeScreen: Sign Up button pressed'); // Debug print
                   Navigator.pushNamed(context, '/signup');
                 },
                 child: const Text('Sign Up'),

@@ -133,6 +133,14 @@ class _HomepageScreenState extends State<HomepageScreen> {
             expandedHeight: 120,
             floating: false,
             pinned: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.person, color: Colors.white),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/profile');
+                },
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               title: Text(
@@ -174,12 +182,12 @@ class _HomepageScreenState extends State<HomepageScreen> {
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.5,
+                childAspectRatio: 0.6,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
               delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                (context, index) {
                   return BookItem(book: _filteredBooks[index], darkMode: true);
                 },
                 childCount: _filteredBooks.length,
@@ -191,7 +199,7 @@ class _HomepageScreenState extends State<HomepageScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF6C63FF),
         onPressed: () {
-          Navigator.of(context).pushNamed('/add-book');
+          Navigator.pushNamed(context, '/add_book');
         },
         child: const Icon(Icons.add, color: Colors.white),
       ),

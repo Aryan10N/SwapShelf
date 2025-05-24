@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import '../models/book_model.dart';
 import '../models/user_model.dart';
@@ -9,7 +8,6 @@ import '../models/swap_request_model.dart';
 class FirebaseService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // Get current user
   User? get currentUser => _auth.currentUser;
@@ -74,18 +72,6 @@ class FirebaseService {
   }
 
   // Book Methods
-  Future<String> uploadBookImage(File imageFile) async {
-    try {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference ref = _storage.ref().child('book_images/$fileName');
-      UploadTask uploadTask = ref.putFile(imageFile);
-      TaskSnapshot snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL();
-    } catch (e) {
-      throw Exception('Failed to upload book image: $e');
-    }
-  }
-
   Future<void> addBook(Book book) async {
     try {
       await _firestore.collection('books').add(book.toMap());
