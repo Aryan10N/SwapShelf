@@ -11,10 +11,10 @@ class AlreadyHaveAnAccountCheck extends StatelessWidget {
   final VoidCallback press;
 
   const AlreadyHaveAnAccountCheck({
-    Key? key,
+    super.key,
     this.login = true, // Default to login screen behavior
     required this.press,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

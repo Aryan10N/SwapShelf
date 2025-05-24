@@ -10,13 +10,13 @@ const kPrimaryColor = Colors.teal; // Example, use your app's primary color
 const kPrimaryLightColor = Color(0xFFB2DFDB); // Example, a lighter shade for the signup button
 
 class Body extends StatelessWidget {
-  const Body({Key? key}) : super(key: key);
+  const Body({super.key});
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size; // This size provides screen dimensions
 
-    return Container( // This is the main background container for the Welcome Screen
+    return SizedBox( // This is the main background container for the Welcome Screen
       height: size.height,
       width: double.infinity,
       child: Stack(

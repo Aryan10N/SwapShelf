@@ -7,6 +7,8 @@ import 'package:swap_shelf/screens/login/login_screen.dart';
 import '../screens/signup/signup_page.dart';
 
 class Body extends StatelessWidget {
+  const Body({super.key});
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
