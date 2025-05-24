@@ -42,7 +42,7 @@ class Body extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
+                const Text(
                   "WELCOME TO SWAP_SHELF",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22.0),
                 ),
@@ -55,26 +55,26 @@ class Body extends StatelessWidget {
 
                 // LOGIN Button
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   width: size.width * 0.8,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(29),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         // backgroundColor: kPrimaryColor, // Use your theme's primary color
-                        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
                       ),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) {
-                              return LoginScreen(); // Navigate to LoginScreen
+                              return const LoginScreen(); // Navigate to LoginScreen
                             },
                           ),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         "LOGIN",
                         style: TextStyle(color: Colors.white, fontSize: 17),
                       ),
@@ -84,14 +84,14 @@ class Body extends StatelessWidget {
 
                 // SIGNUP Button
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   width: size.width * 0.8,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(29),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         // backgroundColor: kPrimaryLightColor, // A different color for signup
-                        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
                       ),
                       onPressed: () {
                         // <<< --- ACTION FOR SIGNUP BUTTON --- >>>
@@ -100,12 +100,12 @@ class Body extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) {
                               // Ensure you have SignUpScreen created and imported
-                              return SignUpScreen(); // Navigate to SignUpScreen
+                              return const SignUpScreen(); // Navigate to SignUpScreen
                             },
                           ),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         "SIGN UP",
                         style: TextStyle(color: Colors.black, fontSize: 17), // Text color that contrasts with button
                       ),

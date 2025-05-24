@@ -1,113 +1,197 @@
 import 'package:flutter/material.dart';
-import 'package:swap_shelf/screens/signup/components/socialiconbutton.dart';
-import 'package:swap_shelf/widgets/already_have_an_account_acheck.dart';
-import '../../../constants.dart';
-import '../../Login/login_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:swap_shelf/constants.dart' as constants;
+import 'package:swap_shelf/providers/auth_provider.dart' as app_auth;
 
-class SignUpForm extends StatelessWidget {
+class SignUpForm extends StatefulWidget {
   const SignUpForm({
     super.key,
   });
 
   @override
+  State<SignUpForm> createState() => _SignUpFormState();
+}
+
+class _SignUpFormState extends State<SignUpForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _nameController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signUp() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        await context.read<app_auth.AuthProvider>().signUp(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+          _nameController.text.trim(),
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: Column(
         children: [
           TextFormField(
-            keyboardType: TextInputType.emailAddress,
+            controller: _nameController,
+            keyboardType: TextInputType.name,
             textInputAction: TextInputAction.next,
-            cursorColor: kPrimaryLightColor,
-            onSaved: (email) {},
+            cursorColor: constants.kPrimaryColor,
             decoration: const InputDecoration(
-              hintText: "Your email",
+              hintText: "Your name",
               prefixIcon: Padding(
-                padding: EdgeInsets.all(defaultPadding),
+                padding: EdgeInsets.all(constants.defaultPadding),
                 child: Icon(Icons.person),
               ),
             ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your name';
+              }
+              return null;
+            },
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: defaultPadding),
-            child: TextFormField(
-              textInputAction: TextInputAction.done,
-              obscureText: true,
-              cursorColor: kPrimaryLightColor,
-              decoration: const InputDecoration(
-                hintText: "Your password",
-                prefixIcon: Padding(
-                  padding: EdgeInsets.all(defaultPadding),
-                  child: Icon(Icons.lock),
-                ),
+          const SizedBox(height: constants.defaultPadding),
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            cursorColor: constants.kPrimaryColor,
+            decoration: const InputDecoration(
+              hintText: "Your email",
+              prefixIcon: Padding(
+                padding: EdgeInsets.all(constants.defaultPadding),
+                child: Icon(Icons.email),
               ),
             ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
+              }
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
           ),
-          // ... (likely below your email/password form and signup button)
-
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(child: Divider(thickness: 1)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text("OR", style: TextStyle(color: Colors.grey.shade600)),
-                ),
-                Expanded(child: Divider(thickness: 1)),
-              ],
+          const SizedBox(height: constants.defaultPadding),
+          TextFormField(
+            controller: _passwordController,
+            textInputAction: TextInputAction.next,
+            obscureText: true,
+            cursorColor: constants.kPrimaryColor,
+            decoration: const InputDecoration(
+              hintText: "Your password",
+              prefixIcon: Padding(
+                padding: EdgeInsets.all(constants.defaultPadding),
+                child: Icon(Icons.lock),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your password';
+              }
+              if (value.length < 6) {
+                return 'Password must be at least 6 characters';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: constants.defaultPadding),
+          TextFormField(
+            controller: _confirmPasswordController,
+            textInputAction: TextInputAction.done,
+            obscureText: true,
+            cursorColor: constants.kPrimaryColor,
+            decoration: const InputDecoration(
+              hintText: "Confirm your password",
+              prefixIcon: Padding(
+                padding: EdgeInsets.all(constants.defaultPadding),
+                child: Icon(Icons.lock_outline),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please confirm your password';
+              }
+              if (value != _passwordController.text) {
+                return 'Passwords do not match';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: constants.defaultPadding),
+          Hero(
+            tag: "signup_btn",
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _signUp,
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text("Sign Up"),
             ),
           ),
+          const SizedBox(height: constants.defaultPadding),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // Google Button
-              SocialIconButton(
-                iconPath: "assets/icons/google-plus.svg", // Replace with your asset path
-                onTap: () {
-                 //  _signInWithGoogle(); // We'll define this function later
-                },
+              const Text(
+                "Already have an Account? ",
+                style: TextStyle(color: constants.kPrimaryColor),
               ),
-              SizedBox(width: 20),
-
-              // Facebook Button
-              SocialIconButton(
-                iconPath: "assets/icons/facebook.svg", // Replace with your asset path
+              GestureDetector(
                 onTap: () {
-                  // _signInWithFacebook(); // We'll define this function later
+                  Navigator.pushReplacementNamed(context, '/login');
                 },
-              ),
-              SizedBox(width: 20),
-
-              // Twitter Button
-              SocialIconButton(
-                iconPath: "assets/icons/twitter.svg", // Replace with your asset path
-                onTap: () {
-                 //  _signInWithTwitter(); // We'll define this function later
-                },
-              ),
-            ],
-          ),
-
-          // ... (rest of your signup page, e.g., "Already have an account?")
-          const SizedBox(height: defaultPadding / 2),
-          ElevatedButton(
-            onPressed: () {},
-            child: Text("Sign Up".toUpperCase()),
-          ),
-          const SizedBox(height: defaultPadding),
-          AlreadyHaveAnAccountCheck(
-            login: false,
-            press: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return const LoginScreen();
-                  },
+                child: const Text(
+                  "Sign In",
+                  style: TextStyle(
+                    color: constants.kPrimaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              );
-            },
+              )
+            ],
           ),
         ],
       ),

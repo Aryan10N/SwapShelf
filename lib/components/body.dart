@@ -16,7 +16,7 @@ class Body extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
+          const Text(
               "SWAP SHELF",
               style: TextStyle(fontWeight: FontWeight.bold),
           ),
@@ -29,23 +29,23 @@ class Body extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                   context,
-                      MaterialPageRoute(builder: (context) => LoginScreen())
+                      MaterialPageRoute(builder: (context) => const LoginScreen())
                   );
                 },
-                child: Text("LOGIN"),
+                child: const Text("LOGIN"),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           SizedBox(
             width: 250,
             child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SignUpScreen())
+                      MaterialPageRoute(builder: (context) => const SignUpScreen())
                   );
                 },
-                child: Text(
+                child: const Text(
                   "SIGNUP",
                 ),
             ),
