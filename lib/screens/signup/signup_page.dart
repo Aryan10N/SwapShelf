@@ -7,8 +7,6 @@ import 'components/sign_up_top_image.dart';
 import 'components/signup_form.dart';
 import 'package:swap_shelf/providers/auth_provider.dart' as app_auth;
 
-class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
 
@@ -58,8 +56,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
 class MobileSignupScreen extends StatelessWidget {
   const MobileSignupScreen({
-    super.key,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

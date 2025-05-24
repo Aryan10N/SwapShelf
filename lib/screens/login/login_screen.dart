@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -142,32 +142,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class MobileLoginScreen extends StatelessWidget {
-  const MobileLoginScreen({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        LoginScreenTopImage(),
-        Row(
-          children: [
-            Spacer(),
-            Expanded(
-              flex: 8,
-              child: LoginForm(),
-            ),
-            Spacer(),
-          ],
-        ),
-      ],
     );
   }
 }
