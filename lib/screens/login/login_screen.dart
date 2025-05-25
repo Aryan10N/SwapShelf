@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../providers/auth_provider.dart';
+import 'components/login_screen_top_image.dart';
+import '../signup/components/socal_sign_up.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -89,9 +91,14 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Text(
+                  "LOGIN",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 32),
                 SvgPicture.asset(
-                  'assets/images/login.svg',
+                  "assets/icons/login.svg",
                   height: 200,
                 ),
                 const SizedBox(height: 32),
@@ -197,6 +204,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                 ),
+                const SizedBox(height: 24),
+                const SocalSignUp(),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {

@@ -265,8 +265,9 @@ class FirebaseService {
   Future<List<Map<String, dynamic>>> getNotifications(String userId) async {
     try {
       final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
           .collection('notifications')
-          .where('userId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .get();
 
@@ -276,17 +277,83 @@ class FirebaseService {
         return data;
       }).toList();
     } catch (e) {
-      throw Exception('Failed to get notifications: $e');
+      print('Error getting notifications: $e');
+      throw Exception('Failed to load notifications');
     }
   }
 
   Future<void> markNotificationAsRead(String notificationId) async {
     try {
-      await _firestore.collection('notifications').doc(notificationId).update({
-        'read': true,
-      });
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) throw Exception('User not authenticated');
+
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          .doc(notificationId)
+          .update({'read': true});
     } catch (e) {
-      throw Exception('Failed to mark notification as read: $e');
+      print('Error marking notification as read: $e');
+      throw Exception('Failed to mark notification as read');
+    }
+  }
+
+  Future<void> markAllNotificationsAsRead(String userId) async {
+    try {
+      final batch = _firestore.batch();
+      final notifications = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          .where('read', isEqualTo: false)
+          .get();
+
+      for (var doc in notifications.docs) {
+        batch.update(doc.reference, {'read': true});
+      }
+
+      await batch.commit();
+    } catch (e) {
+      print('Error marking all notifications as read: $e');
+      throw Exception('Failed to mark all notifications as read');
+    }
+  }
+
+  Future<void> deleteNotification(String notificationId) async {
+    try {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) throw Exception('User not authenticated');
+
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          .doc(notificationId)
+          .delete();
+    } catch (e) {
+      print('Error deleting notification: $e');
+      throw Exception('Failed to delete notification');
+    }
+  }
+
+  Future<void> clearAllNotifications(String userId) async {
+    try {
+      final batch = _firestore.batch();
+      final notifications = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          .get();
+
+      for (var doc in notifications.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+    } catch (e) {
+      print('Error clearing all notifications: $e');
+      throw Exception('Failed to clear all notifications');
     }
   }
 
@@ -322,6 +389,20 @@ class FirebaseService {
       return null;
     } catch (e) {
       throw Exception('Failed to get book: $e');
+    }
+  }
+
+  Future<List<SwapRequest>> getUserSwapRequests(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('swap_requests')
+          .where('requesterId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) => SwapRequest.fromFirestore(doc)).toList();
+    } catch (e) {
+      throw Exception('Failed to get user swap requests: $e');
     }
   }
 } 

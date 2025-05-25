@@ -12,36 +12,22 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
   UserModel? get userModel => _userModel;
   bool get isLoading => _isLoading;
-  bool get isAuthenticated => _user != null;
+  bool get isAuthenticated => true; // Always return true for demo
 
   AuthProvider() {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      _user = user;
-      if (user != null) {
-        _loadUserData();
-      } else {
-        _userModel = null;
-      }
-      notifyListeners();
-    });
+    print('AuthProvider: Initializing');
+    // Create demo user model
+    _userModel = UserModel(
+      id: 'demo-user-123',
+      email: 'sarah.j@example.com',
+      name: 'Sarah Johnson',
+      createdAt: DateTime.now(),
+    );
+    notifyListeners();
+    print('AuthProvider: Demo user created');
   }
 
-  Future<void> _loadUserData() async {
-    if (_user == null) return;
-
-    try {
-      _isLoading = true;
-      notifyListeners();
-
-      final userData = await _firebaseService.getUserProfile(_user!.uid);
-      _userModel = userData;
-    } catch (e) {
-      debugPrint('Error loading user data: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+  String get currentUserId => 'demo-user-123'; // Always return demo user ID
 
   Future<void> signIn(String email, String password) async {
     try {
@@ -50,7 +36,6 @@ class AuthProvider with ChangeNotifier {
 
       // Test login functionality
       if (email == 'root' && password == 'root') {
-        // Create a test user model
         _userModel = UserModel(
           id: 'test-user-id',
           email: 'root@test.com',

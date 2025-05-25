@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/swap_request_model.dart';
-import '../../models/book_model.dart';
+import '../../models/book.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/book_provider.dart';
 import '../../services/firebase_service.dart';
@@ -33,39 +33,49 @@ class _SwapRequestDetailsScreenState extends State<SwapRequestDetailsScreen> {
 
   Future<void> _loadSwapRequest() async {
     try {
-      final swapRequest = await _firebaseService.getSwapRequest(widget.swapRequestId);
-      if (swapRequest != null) {
-        setState(() {
-          _swapRequest = swapRequest;
-        });
-        await _loadBooks();
-      }
+      // Sample data for demonstration
+      final sampleSwapRequest = SwapRequest(
+        id: widget.swapRequestId,
+        bookId: 'sample_book_1',
+        requesterId: 'sample_user_1',
+        ownerId: 'current_user',
+        requesterBookId: 'sample_book_2',
+        status: SwapRequestStatus.pending,
+        createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        message: 'I would love to swap my book for yours!',
+      );
+
+      final sampleRequestedBook = Book(
+        id: 'sample_book_1',
+        title: 'The Psychology of Money',
+        author: 'Morgan Housel',
+        description: 'Timeless lessons on wealth, greed, and happiness.',
+        imageUrl: 'https://m.media-amazon.com/images/I/71OUKAvEkaL._AC_UF1000,1000_QL80_.jpg',
+        color: Colors.blueAccent,
+        available: true,
+      );
+
+      final sampleRequesterBook = Book(
+        id: 'sample_book_2',
+        title: 'Atomic Habits',
+        author: 'James Clear',
+        description: 'An Easy & Proven Way to Build Good Habits & Break Bad Ones.',
+        imageUrl: 'https://m.media-amazon.com/images/I/81bGKUa1e0L._AC_UF1000,1000_QL80_.jpg',
+        color: Colors.orangeAccent,
+        available: true,
+      );
+
+      setState(() {
+        _swapRequest = sampleSwapRequest;
+        _requestedBook = sampleRequestedBook;
+        _requesterBook = sampleRequesterBook;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load swap request: $e')),
       );
     } finally {
       setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _loadBooks() async {
-    if (_swapRequest == null) return;
-
-    try {
-      final requestedBook = await _firebaseService.getBook(_swapRequest!.bookId);
-      final requesterBook = _swapRequest!.requesterBookId != null
-          ? await _firebaseService.getBook(_swapRequest!.requesterBookId!)
-          : null;
-
-      setState(() {
-        _requestedBook = requestedBook;
-        _requesterBook = requesterBook;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load books: $e')),
-      );
     }
   }
 
@@ -100,13 +110,13 @@ class _SwapRequestDetailsScreenState extends State<SwapRequestDetailsScreen> {
     final isOwner = currentUserId == _swapRequest?.ownerId;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF181A20),
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF181A20),
+        backgroundColor: Colors.white,
         title: const Text(
           'Swap Request Details',
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF6C63FF),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -114,12 +124,51 @@ class _SwapRequestDetailsScreenState extends State<SwapRequestDetailsScreen> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
+              ),
+            )
           : _swapRequest == null
-              ? const Center(
-                  child: Text(
-                    'Swap request not found',
-                    style: TextStyle(color: Colors.white70),
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.swap_horiz,
+                        size: 64,
+                        color: Color(0xFF6C63FF),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'No Swap Request Found',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'The swap request you\'re looking for doesn\'t exist or has been removed.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6C63FF),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                        ),
+                        child: const Text('Go Back'),
+                      ),
+                    ],
                   ),
                 )
               : SingleChildScrollView(

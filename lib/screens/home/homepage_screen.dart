@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:swap_shelf/models/book.dart';
 import 'package:swap_shelf/widgets/book_item.dart';
+import 'package:swap_shelf/screens/swap/swap_requests_list.dart';
+import 'package:swap_shelf/screens/notifications/notifications_screen.dart';
 
 class HomepageScreen extends StatefulWidget {
   const HomepageScreen({Key? key}) : super(key: key);
@@ -14,6 +16,17 @@ class _HomepageScreenState extends State<HomepageScreen> {
   List<Book> _filteredBooks = [];
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
+  int _selectedIndex = 0;
+  String _selectedCategory = 'All';
+
+  final List<String> _categories = [
+    'All',
+    'Fiction',
+    'Non-Fiction',
+    'Science',
+    'History',
+    'Biography'
+  ];
 
   @override
   void initState() {
@@ -79,7 +92,6 @@ class _HomepageScreenState extends State<HomepageScreen> {
         color: Colors.purpleAccent,
         available: false,
       ),
-      // Adding three more books
       Book(
         id: '4',
         title: 'Zero to One',
@@ -116,92 +128,214 @@ class _HomepageScreenState extends State<HomepageScreen> {
     });
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        // Already on home page
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              backgroundColor: const Color(0xFFF5F5F5),
+              appBar: AppBar(
+                backgroundColor: Colors.white,
+                title: const Text(
+                  'Swap Requests',
+                  style: TextStyle(
+                    color: Color(0xFF6C63FF),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                elevation: 0,
+              ),
+              body: const SwapRequestsList(),
+            ),
+          ),
+        ).then((_) {
+          // When returning from swaps page, set index back to home
+          setState(() {
+            _selectedIndex = 0;
+          });
+        });
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const NotificationsScreen(),
+          ),
+        ).then((_) {
+          // When returning from notifications page, set index back to home
+          setState(() {
+            _selectedIndex = 0;
+          });
+        });
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF181A20),
+      backgroundColor: const Color(0xFFF5F5F5),
       body: _isLoading
           ? const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
-        ),
-      )
-          : CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: const Color(0xFF181A20),
-            expandedHeight: 120,
-            floating: false,
-            pinned: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.person, color: Colors.white),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/profile');
-                },
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
               ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              title: Text(
-                'Swap Shelf',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Search by title or author',
-                  hintStyle: const TextStyle(color: Colors.white54),
-                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
-                  filled: true,
-                  fillColor: const Color(0xFF23243A),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+            )
+          : RefreshIndicator(
+              onRefresh: _loadBooks,
+              color: const Color(0xFF6C63FF),
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    backgroundColor: Colors.white,
+                    expandedHeight: 120,
+                    floating: false,
+                    pinned: true,
+                    elevation: 0,
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.person, color: Color(0xFF6C63FF)),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/profile');
+                        },
+                      ),
+                    ],
+                    flexibleSpace: FlexibleSpaceBar(
+                      titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      title: Text(
+                        'Swap Shelf',
+                        style: TextStyle(
+                          color: Color(0xFF6C63FF),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 16,
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: TextField(
+                        controller: _searchController,
+                        style: const TextStyle(color: Colors.black87),
+                        decoration: InputDecoration(
+                          hintText: 'Search by title or author',
+                          hintStyle: const TextStyle(color: Colors.black54),
+                          prefixIcon: const Icon(Icons.search, color: Color(0xFF6C63FF)),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade200),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade200),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF6C63FF)),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  SliverToBoxAdapter(
+                    child: Container(
+                      height: 50,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _categories.length,
+                        itemBuilder: (context, index) {
+                          final category = _categories[index];
+                          final isSelected = category == _selectedCategory;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              label: Text(
+                                category,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  _selectedCategory = category;
+                                });
+                              },
+                              backgroundColor: Colors.white,
+                              selectedColor: const Color(0xFF6C63FF),
+                              side: BorderSide(color: Colors.grey.shade200),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.6,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return BookItem(book: _filteredBooks[index], darkMode: false);
+                        },
+                        childCount: _filteredBooks.length,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.6,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return BookItem(book: _filteredBooks[index], darkMode: true);
-                },
-                childCount: _filteredBooks.length,
-              ),
-            ),
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF6C63FF),
         onPressed: () {
           Navigator.pushNamed(context, '/add_book');
         },
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.swap_horiz),
+            label: 'Swaps',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: const Color(0xFF6C63FF),
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        elevation: 8,
+        onTap: _onItemTapped,
       ),
     );
   }

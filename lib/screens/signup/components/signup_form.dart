@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:swap_shelf/constants.dart' as constants;
 import 'package:swap_shelf/providers/auth_provider.dart' as app_auth;
+import 'socal_sign_up.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({
@@ -171,6 +172,8 @@ class _SignUpFormState extends State<SignUpForm> {
                   : const Text("Sign Up"),
             ),
           ),
+          const SizedBox(height: constants.defaultPadding),
+          const SocalSignUp(),
           const SizedBox(height: constants.defaultPadding),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import '../../../constants.dart';
+import '../../signup/components/socal_sign_up.dart';
 
 class LoginScreenTopImage extends StatelessWidget {
   const LoginScreenTopImage({
@@ -28,6 +28,7 @@ class LoginScreenTopImage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: defaultPadding * 2),
+        const SocalSignUp(),
       ],
     );
   }

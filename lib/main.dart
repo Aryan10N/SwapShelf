@@ -9,9 +9,12 @@ import 'package:swap_shelf/screens/login/login_screen.dart'; // Import LoginScre
 import 'package:swap_shelf/screens/signup/signup_page.dart'; // Import SignupPage
 import 'package:swap_shelf/screens/add_book_screen.dart'; // Keep your existing imports
 import 'package:swap_shelf/screens/test_firebase_screen.dart';
+import 'package:swap_shelf/screens/swap/swap_page.dart';
+import 'package:swap_shelf/screens/swap/swap_request_details_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:swap_shelf/providers/auth_provider.dart' as app_auth;
 import 'package:swap_shelf/providers/book_provider.dart';
+import 'package:swap_shelf/providers/profile_provider.dart';
 import 'package:swap_shelf/screens/profile/profile_screen.dart';
 
 void main() async {
@@ -48,6 +51,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => app_auth.AuthProvider()),
         ChangeNotifierProvider(create: (_) => BookProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
       child: MaterialApp(
         title: 'Swap Shelf',
@@ -109,6 +113,10 @@ class MyApp extends StatelessWidget {
           '/add_book': (context) => const AddBookScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/test-firebase': (context) => const TestFirebaseScreen(),
+          '/swap_page': (context) => const SwapPage(),
+          '/swap_request_details': (context) => SwapRequestDetailsScreen(
+                swapRequestId: ModalRoute.of(context)!.settings.arguments as String,
+              ),
           // Add other routes as needed
         },
       ),
