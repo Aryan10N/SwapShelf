@@ -23,12 +23,12 @@ class ProfileProvider with ChangeNotifier {
       // Demo profile data
       _profile = UserProfile(
         id: userId,
-        name: 'Sarah Johnson',
-        email: 'sarah.j@example.com',
-        phone: '+1 (555) 987-6543',
-        address: '456 Reading Lane, Booktown, CA 90210',
+        name: 'Aditya Biradar',
+        email: 'adityabiradar523@gmail.com',
+        phone: '+91 7435679835',
+        address: 'Bidar,585401,Karnatka',
         bio: 'Book enthusiast and avid reader. Love to share and discover new stories! Currently reading "The Midnight Library" by Matt Haig. Always looking for new book recommendations and swap opportunities.',
-        profileImageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
+        profileImageUrl: 'https://as1.ftcdn.net/jpg/05/60/26/08/1000_F_560260880_O1V3Qm2cNO5HWjN66mBh2NrlPHNHOUxW.jpg',
         booksShared: 15,
         booksReceived: 12,
         rating: 4.8,
