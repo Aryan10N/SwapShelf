@@ -3,6 +3,7 @@ import 'package:swap_shelf/models/book.dart';
 import 'package:swap_shelf/widgets/book_item.dart';
 import 'package:swap_shelf/screens/swap/swap_requests_list.dart';
 import 'package:swap_shelf/screens/notifications/notifications_screen.dart';
+import 'package:swap_shelf/screens/Chat/chat_list_screen.dart';
 
 class HomepageScreen extends StatefulWidget {
   const HomepageScreen({Key? key}) : super(key: key);
@@ -159,7 +160,6 @@ class _HomepageScreenState extends State<HomepageScreen> {
             ),
           ),
         ).then((_) {
-          // When returning from swaps page, set index back to home
           setState(() {
             _selectedIndex = 0;
           });
@@ -169,10 +169,21 @@ class _HomepageScreenState extends State<HomepageScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
+            builder: (context) => const ChatListScreen(),
+          ),
+        ).then((_) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        });
+        break;
+      case 3:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
             builder: (context) => const NotificationsScreen(),
           ),
         ).then((_) {
-          // When returning from notifications page, set index back to home
           setState(() {
             _selectedIndex = 0;
           });
@@ -326,6 +337,10 @@ class _HomepageScreenState extends State<HomepageScreen> {
             label: 'Swaps',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: 'Chat',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
             label: 'Notifications',
           ),
@@ -336,6 +351,7 @@ class _HomepageScreenState extends State<HomepageScreen> {
         backgroundColor: Colors.white,
         elevation: 8,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }

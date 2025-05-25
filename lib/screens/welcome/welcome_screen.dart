@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
@@ -14,6 +15,19 @@ class WelcomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // SVG Image
+              Expanded(
+                flex: 3,
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  child: SvgPicture.asset(
+                    'assets/icons/chat.svg',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Welcome Text
               const Text(
                 'Welcome to SwapShelf',
                 style: TextStyle(
@@ -31,12 +45,16 @@ class WelcomeScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
+              // Buttons
               ElevatedButton(
                 onPressed: () {
                   print('WelcomeScreen: Get Started button pressed'); // Debug print
                   Navigator.pushNamed(context, '/login');
                 },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
                 child: const Text('Get Started'),
               ),
               const SizedBox(height: 16),
@@ -45,6 +63,9 @@ class WelcomeScreen extends StatelessWidget {
                   print('WelcomeScreen: Sign Up button pressed'); // Debug print
                   Navigator.pushNamed(context, '/signup');
                 },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
                 child: const Text('Sign Up'),
               ),
             ],
