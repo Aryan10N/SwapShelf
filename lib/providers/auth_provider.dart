@@ -8,47 +8,38 @@ class AuthProvider with ChangeNotifier {
   User? _user;
   UserModel? _userModel;
   bool _isLoading = false;
+  String? _error;
 
   User? get user => _user;
   UserModel? get userModel => _userModel;
   bool get isLoading => _isLoading;
-  bool get isAuthenticated => true; // Always return true for demo
+  bool get isAuthenticated => _user != null;
+  String? get error => _error;
 
   AuthProvider() {
-    print('AuthProvider: Initializing');
-    // Create demo user model
-    _userModel = UserModel(
-      id: 'demo-user-123',
-      email: 'sarah.j@example.com',
-      name: 'Sarah Johnson',
-      createdAt: DateTime.now(),
-    );
-    notifyListeners();
-    print('AuthProvider: Demo user created');
+    _init();
   }
 
-  String get currentUserId => 'demo-user-123'; // Always return demo user ID
+  Future<void> _init() async {
+    _user = _firebaseService.currentUser;
+    if (_user != null) {
+      _userModel = await _firebaseService.getUserProfile(_user!.uid);
+    }
+    notifyListeners();
+  }
+
+  String get currentUserId => _user?.uid ?? '';
 
   Future<void> signIn(String email, String password) async {
     try {
       _isLoading = true;
       notifyListeners();
 
-      // Test login functionality
-      if (email == 'root' && password == 'root') {
-        _userModel = UserModel(
-          id: 'test-user-id',
-          email: 'root@test.com',
-          name: 'Test User',
-          createdAt: DateTime.now(),
-        );
-        _isLoading = false;
-        notifyListeners();
-        return;
-      }
-
-      // Regular Firebase authentication
-      await _firebaseService.signInWithEmail(email, password);
+      final userCredential = await _firebaseService.signInWithEmail(email, password);
+      _user = userCredential.user;
+      _userModel = await _firebaseService.getUserProfile(_user!.uid);
+      
+      notifyListeners();
     } catch (e) {
       rethrow;
     } finally {
@@ -63,15 +54,19 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       final userCredential = await _firebaseService.signUpWithEmail(email, password);
+      _user = userCredential.user;
       
       final userModel = UserModel(
-        id: userCredential.user!.uid,
+        id: _user!.uid,
         email: email,
         name: name,
         createdAt: DateTime.now(),
       );
       
       await _firebaseService.createUserProfile(userModel);
+      _userModel = userModel;
+      
+      notifyListeners();
     } catch (e) {
       rethrow;
     } finally {
@@ -98,8 +93,80 @@ class AuthProvider with ChangeNotifier {
 
       await _firebaseService.updateUserProfile(updatedUser.id, updatedUser.toMap());
       _userModel = updatedUser;
+      notifyListeners();
     } catch (e) {
       rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      
+      await _firebaseService.resetPassword(email);
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final userCredential = await _firebaseService.signInWithGoogle();
+      if (userCredential.user != null) {
+        _user = userCredential.user;
+        _userModel = await _firebaseService.getUserProfile(userCredential.user!.uid);
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> signInWithFacebook() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final userCredential = await _firebaseService.signInWithFacebook();
+      if (userCredential.user != null) {
+        _user = userCredential.user;
+        _userModel = await _firebaseService.getUserProfile(userCredential.user!.uid);
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> signInWithTwitter() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final userCredential = await _firebaseService.signInWithTwitter();
+      if (userCredential.user != null) {
+        _user = userCredential.user;
+        _userModel = await _firebaseService.getUserProfile(userCredential.user!.uid);
+      }
+    } catch (e) {
+      _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();

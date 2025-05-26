@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:twitter_login/twitter_login.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/book_model.dart';
 import '../models/user_model.dart';
 import '../models/swap_request_model.dart';
@@ -8,6 +12,13 @@ import '../models/swap_request_model.dart';
 class FirebaseService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FacebookAuth _facebookAuth = FacebookAuth.instance;
+  final TwitterLogin _twitterLogin = TwitterLogin(
+    apiKey: 'YOUR_TWITTER_API_KEY',
+    apiSecretKey: 'YOUR_TWITTER_API_SECRET',
+    redirectURI: 'YOUR_TWITTER_REDIRECT_URI',
+  );
 
   // Get current user
   User? get currentUser => _auth.currentUser;
@@ -18,28 +29,56 @@ class FirebaseService {
   // Auth Methods
   Future<UserCredential> signUpWithEmail(String email, String password) async {
     try {
-      return await _auth.createUserWithEmailAndPassword(
+      final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-    } catch (e) {
-      throw Exception('Failed to sign up: $e');
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'email-already-in-use':
+          throw 'An account already exists with this email.';
+        case 'invalid-email':
+          throw 'The email address is not valid.';
+        case 'operation-not-allowed':
+          throw 'Email/password accounts are not enabled.';
+        case 'weak-password':
+          throw 'The password is too weak.';
+        default:
+          throw 'An error occurred. Please try again.';
+      }
     }
   }
 
   Future<UserCredential> signInWithEmail(String email, String password) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-    } catch (e) {
-      throw Exception('Failed to sign in: $e');
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          throw 'No user found with this email.';
+        case 'wrong-password':
+          throw 'Wrong password provided.';
+        case 'invalid-email':
+          throw 'The email address is not valid.';
+        case 'user-disabled':
+          throw 'This user account has been disabled.';
+        default:
+          throw 'An error occurred. Please try again.';
+      }
     }
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
+    try {
+      await _auth.signOut();
+    } catch (e) {
+      throw 'Failed to sign out: $e';
+    }
   }
 
   // User Methods
@@ -47,19 +86,19 @@ class FirebaseService {
     try {
       await _firestore.collection('users').doc(user.id).set(user.toMap());
     } catch (e) {
-      throw Exception('Failed to create user profile: $e');
+      throw 'Failed to create user profile: $e';
     }
   }
 
   Future<UserModel?> getUserProfile(String userId) async {
     try {
-      DocumentSnapshot doc = await _firestore.collection('users').doc(userId).get();
+      final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
         return UserModel.fromFirestore(doc);
       }
       return null;
     } catch (e) {
-      throw Exception('Failed to get user profile: $e');
+      throw 'Failed to get user profile: $e';
     }
   }
 
@@ -67,7 +106,7 @@ class FirebaseService {
     try {
       await _firestore.collection('users').doc(userId).update(data);
     } catch (e) {
-      throw Exception('Failed to update user profile: $e');
+      throw 'Failed to update user profile: $e';
     }
   }
 
@@ -93,7 +132,23 @@ class FirebaseService {
       }
 
       QuerySnapshot snapshot = await query.get();
-      return snapshot.docs.map((doc) => Book.fromFirestore(doc)).toList();
+      return snapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Book(
+          id: doc.id,
+          title: data['title'] ?? '',
+          author: data['author'] ?? '',
+          description: data['description'] ?? '',
+          imageUrl: data['imageUrl'] ?? '',
+          ownerId: data['ownerId'] ?? '',
+          ownerName: data['ownerName'] ?? '',
+          isAvailable: data['isAvailable'] ?? true,
+          createdAt: (data['createdAt'] as Timestamp).toDate(),
+          categories: List<String>.from(data['categories'] ?? []),
+          condition: data['condition'] ?? 'Good',
+          isbn: data['isbn'] ?? '',
+        );
+      }).toList();
     } catch (e) {
       throw Exception('Failed to get books: $e');
     }
@@ -403,6 +458,135 @@ class FirebaseService {
       return snapshot.docs.map((doc) => SwapRequest.fromFirestore(doc)).toList();
     } catch (e) {
       throw Exception('Failed to get user swap requests: $e');
+    }
+  }
+
+  // Reset password
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          throw 'No user found with this email.';
+        case 'invalid-email':
+          throw 'The email address is not valid.';
+        default:
+          throw 'An error occurred. Please try again.';
+      }
+    }
+  }
+
+  // Social Authentication Methods
+  Future<UserCredential> signInWithGoogle() async {
+    try {
+      if (kIsWeb) {
+        // Web platform
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+        return await _auth.signInWithPopup(googleProvider);
+      } else {
+        // Mobile platform
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) throw 'Google sign in aborted';
+
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        final userCredential = await _auth.signInWithCredential(credential);
+        if (userCredential.user != null) {
+          final user = UserModel(
+            id: userCredential.user!.uid,
+            email: userCredential.user!.email!,
+            name: userCredential.user!.displayName ?? '',
+            photoUrl: userCredential.user!.photoURL,
+            createdAt: DateTime.now(),
+          );
+          await createUserProfile(user);
+        }
+        return userCredential;
+      }
+    } catch (e) {
+      print('Google Sign In Error: $e');
+      throw 'Failed to sign in with Google: $e';
+    }
+  }
+
+  Future<UserCredential> signInWithFacebook() async {
+    try {
+      if (kIsWeb) {
+        // Web platform
+        FacebookAuthProvider facebookProvider = FacebookAuthProvider();
+        facebookProvider.addScope('email');
+        facebookProvider.addScope('public_profile');
+        return await _auth.signInWithPopup(facebookProvider);
+      } else {
+        // Mobile platform
+        final LoginResult result = await _facebookAuth.login();
+        if (result.status != LoginStatus.success) {
+          throw 'Facebook sign in failed';
+        }
+
+        final OAuthCredential credential = FacebookAuthProvider.credential(
+          result.accessToken!.token,
+        );
+
+        final userCredential = await _auth.signInWithCredential(credential);
+        if (userCredential.user != null) {
+          final user = UserModel(
+            id: userCredential.user!.uid,
+            email: userCredential.user!.email!,
+            name: userCredential.user!.displayName ?? '',
+            photoUrl: userCredential.user!.photoURL,
+            createdAt: DateTime.now(),
+          );
+          await createUserProfile(user);
+        }
+        return userCredential;
+      }
+    } catch (e) {
+      print('Facebook Sign In Error: $e');
+      throw 'Failed to sign in with Facebook: $e';
+    }
+  }
+
+  Future<UserCredential> signInWithTwitter() async {
+    try {
+      if (kIsWeb) {
+        // Web platform
+        TwitterAuthProvider twitterProvider = TwitterAuthProvider();
+        return await _auth.signInWithPopup(twitterProvider);
+      } else {
+        // Mobile platform
+        final authResult = await _twitterLogin.login();
+        if (authResult.status != TwitterLoginStatus.loggedIn) {
+          throw 'Twitter sign in failed';
+        }
+
+        final OAuthCredential credential = TwitterAuthProvider.credential(
+          accessToken: authResult.authToken!,
+          secret: authResult.authTokenSecret!,
+        );
+
+        final userCredential = await _auth.signInWithCredential(credential);
+        if (userCredential.user != null) {
+          final user = UserModel(
+            id: userCredential.user!.uid,
+            email: userCredential.user!.email!,
+            name: userCredential.user!.displayName ?? '',
+            photoUrl: userCredential.user!.photoURL,
+            createdAt: DateTime.now(),
+          );
+          await createUserProfile(user);
+        }
+        return userCredential;
+      }
+    } catch (e) {
+      print('Twitter Sign In Error: $e');
+      throw 'Failed to sign in with Twitter: $e';
     }
   }
 } 

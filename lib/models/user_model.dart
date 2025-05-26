@@ -7,6 +7,7 @@ class UserModel {
   final String? bio;
   final String? location;
   final String? profileImageUrl;
+  final String? photoUrl;
   final DateTime createdAt;
   final int booksShared;
   final int booksReceived;
@@ -19,6 +20,7 @@ class UserModel {
     this.bio,
     this.location,
     this.profileImageUrl,
+    this.photoUrl,
     required this.createdAt,
     this.booksShared = 0,
     this.booksReceived = 0,
@@ -34,6 +36,7 @@ class UserModel {
       bio: data['bio'],
       location: data['location'],
       profileImageUrl: data['profileImageUrl'],
+      photoUrl: data['photoUrl'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       booksShared: data['booksShared'] ?? 0,
       booksReceived: data['booksReceived'] ?? 0,
@@ -48,6 +51,7 @@ class UserModel {
       'bio': bio,
       'location': location,
       'profileImageUrl': profileImageUrl,
+      'photoUrl': photoUrl,
       'createdAt': Timestamp.fromDate(createdAt),
       'booksShared': booksShared,
       'booksReceived': booksReceived,
@@ -62,6 +66,7 @@ class UserModel {
     String? bio,
     String? location,
     String? profileImageUrl,
+    String? photoUrl,
     DateTime? createdAt,
     int? booksShared,
     int? booksReceived,
@@ -74,6 +79,7 @@ class UserModel {
       bio: bio ?? this.bio,
       location: location ?? this.location,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      photoUrl: photoUrl ?? this.photoUrl,
       createdAt: createdAt ?? this.createdAt,
       booksShared: booksShared ?? this.booksShared,
       booksReceived: booksReceived ?? this.booksReceived,

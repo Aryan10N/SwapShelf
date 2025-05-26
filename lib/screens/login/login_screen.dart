@@ -17,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -35,23 +36,25 @@ class _LoginScreenState extends State<LoginScreen> {
         final email = _emailController.text.trim();
         final password = _passwordController.text.trim();
 
-        // Test login check
-        if (email == 'root' && password == 'root') {
-          await context.read<AuthProvider>().signIn(email, password);
-          if (mounted) {
-            Navigator.pushReplacementNamed(context, '/home');
-          }
-          return;
-        }
-
-        // Regular login
         await context.read<AuthProvider>().signIn(email, password);
+        
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(e.toString()),
               backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                textColor: Colors.white,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+              ),
             ),
           );
         }
@@ -140,6 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
                     return null;
                   },
                 ),
@@ -151,6 +157,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: 'Password',
                     hintText: 'Enter your password',
                     prefixIcon: const Icon(Icons.lock, color: Colors.grey),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                     labelStyle: const TextStyle(color: Colors.grey),
                     hintStyle: const TextStyle(color: Colors.grey),
                     filled: true,
@@ -168,10 +185,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderSide: const BorderSide(color: Colors.blue),
                     ),
                   ),
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
                     }
                     return null;
                   },
@@ -213,6 +233,65 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: const Text(
                     'Don\'t have an account? Sign up',
+                    style: TextStyle(color: Color(0xFF6C63FF)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // TODO: Implement forgot password functionality
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Reset Password'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Enter your email to reset your password'),
+                            const SizedBox(height: 16),
+                            TextField(
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                hintText: 'Enter your email',
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              onSubmitted: (email) async {
+                                try {
+                                  await context.read<AuthProvider>().resetPassword(email);
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Password reset email sent!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(e.toString()),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Forgot Password?',
                     style: TextStyle(color: Color(0xFF6C63FF)),
                   ),
                 ),
