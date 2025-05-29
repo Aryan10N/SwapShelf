@@ -17,28 +17,49 @@ import 'package:swap_shelf/providers/book_provider.dart';
 import 'package:swap_shelf/providers/profile_provider.dart';
 import 'package:swap_shelf/screens/profile/profile_screen.dart';
 
-void main() async {
-  print('main: Starting app initialization'); // Debug print
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  print('main: Initializing Firebase'); // Debug print
+Future<void> _createDefaultUser() async {
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    print('main: Firebase initialized successfully'); // Debug print
+    print('Attempting to create default user...');
+    
+    // Check if the default user already exists
+    try {
+      print('Checking if default user exists...');
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: 'admin@swapshelf.com',
+        password: 'admin123',
+      );
+      print('Default user exists, signing out...');
+      await FirebaseAuth.instance.signOut();
+    } on FirebaseAuthException catch (e) {
+      print('FirebaseAuthException during sign in: ${e.code} - ${e.message}');
+      if (e.code == 'user-not-found') {
+        print('Creating new default user...');
+        try {
+          final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: 'admin@swapshelf.com',
+            password: 'admin123',
+          );
+          print('Default user created successfully: ${userCredential.user?.uid}');
+        } catch (createError) {
+          print('Error creating default user: $createError');
+          if (createError is FirebaseAuthException) {
+            print('FirebaseAuthException during creation: ${createError.code} - ${createError.message}');
+          }
+          rethrow;
+        }
+      }
+    }
   } catch (e) {
-    print('main: Error initializing Firebase: $e'); // Debug print
+    print('Unexpected error in _createDefaultUser: $e');
+    rethrow;
   }
+}
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ),
-  );
-  print('main: Running app'); // Debug print
-  runApp(const MyApp());
+// main.dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -102,11 +123,12 @@ class MyApp extends StatelessWidget {
         ),
 
         // --- Crucial Part: Handle Initial Route Based on Auth State ---
-        home: const WelcomeScreen(),
+        initialRoute: '/welcome',
         // --- End of Crucial Part ---
 
         // Define your named routes for easy navigation
         routes: {
+          '/welcome': (context) => const WelcomeScreen(),
           '/login': (context) => const LoginScreen(),
           '/signup': (context) => const SignUpScreen(),
           '/home': (context) => const HomepageScreen(),

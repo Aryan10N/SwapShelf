@@ -1,18 +1,52 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:twitter_login/twitter_login.dart';
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import '../models/book_model.dart';
 import '../models/user_model.dart';
 import '../models/swap_request_model.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class FirebaseService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  static final FirebaseService _instance = FirebaseService._internal();
+  factory FirebaseService() => _instance;
+  FirebaseService._internal();
+
+  late final firebase_auth.FirebaseAuth _firebaseAuth;
+  late final FirebaseFirestore _firestore;
+  late final FirebaseStorage _storage;
+  late final FirebaseMessaging _messaging;
+
+  Future<void> initialize() async {
+    await Firebase.initializeApp();
+    _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+    _firestore = FirebaseFirestore.instance;
+    _storage = FirebaseStorage.instance;
+    _messaging = FirebaseMessaging.instance;
+
+    // Request notification permissions
+    await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // Handle background messages
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
+
+  // Getters for Firebase instances
+  firebase_auth.FirebaseAuth get auth => _firebaseAuth;
+  FirebaseFirestore get firestore => _firestore;
+  FirebaseStorage get storage => _storage;
+  FirebaseMessaging get messaging => _messaging;
+
+  final GoogleSignIn? _googleSignIn = kIsWeb ? null : GoogleSignIn();
   final FacebookAuth _facebookAuth = FacebookAuth.instance;
   final TwitterLogin _twitterLogin = TwitterLogin(
     apiKey: 'YOUR_TWITTER_API_KEY',
@@ -21,20 +55,20 @@ class FirebaseService {
   );
 
   // Get current user
-  User? get currentUser => _auth.currentUser;
+  firebase_auth.User? get currentUser => _firebaseAuth.currentUser;
 
   // Stream of auth changes
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  Stream<firebase_auth.User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
   // Auth Methods
-  Future<UserCredential> signUpWithEmail(String email, String password) async {
+  Future<firebase_auth.UserCredential> signUpWithEmail(String email, String password) async {
     try {
-      final userCredential = await _auth.createUserWithEmailAndPassword(
+      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
       return userCredential;
-    } on FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'email-already-in-use':
           throw 'An account already exists with this email.';
@@ -50,14 +84,14 @@ class FirebaseService {
     }
   }
 
-  Future<UserCredential> signInWithEmail(String email, String password) async {
+  Future<firebase_auth.UserCredential> signInWithEmail(String email, String password) async {
     try {
-      final userCredential = await _auth.signInWithEmailAndPassword(
+      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
       return userCredential;
-    } on FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'user-not-found':
           throw 'No user found with this email.';
@@ -75,14 +109,22 @@ class FirebaseService {
 
   Future<void> signOut() async {
     try {
-      await _auth.signOut();
+      if (kIsWeb) {
+        await _firebaseAuth.signOut();
+      } else {
+        await Future.wait([
+          _firebaseAuth.signOut(),
+          _googleSignIn?.signOut() ?? Future.value(),
+        ]);
+      }
     } catch (e) {
-      throw 'Failed to sign out: $e';
+      debugPrint('Error signing out: $e');
+      rethrow;
     }
   }
 
   // User Methods
-  Future<void> createUserProfile(UserModel user) async {
+  Future<void> createUserProfile(AppUser user) async {
     try {
       await _firestore.collection('users').doc(user.id).set(user.toMap());
     } catch (e) {
@@ -90,11 +132,11 @@ class FirebaseService {
     }
   }
 
-  Future<UserModel?> getUserProfile(String userId) async {
+  Future<AppUser?> getUserProfile(String userId) async {
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
-        return UserModel.fromFirestore(doc);
+        return AppUser.fromFirestore(doc);
       }
       return null;
     } catch (e) {
@@ -124,7 +166,7 @@ class FirebaseService {
       Query query = _firestore.collection('books');
       
       if (category != null) {
-        query = query.where('categories', arrayContains: category);
+        query = query.where('category', isEqualTo: category);
       }
       
       if (isAvailable != null) {
@@ -132,23 +174,7 @@ class FirebaseService {
       }
 
       QuerySnapshot snapshot = await query.get();
-      return snapshot.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        return Book(
-          id: doc.id,
-          title: data['title'] ?? '',
-          author: data['author'] ?? '',
-          description: data['description'] ?? '',
-          imageUrl: data['imageUrl'] ?? '',
-          ownerId: data['ownerId'] ?? '',
-          ownerName: data['ownerName'] ?? '',
-          isAvailable: data['isAvailable'] ?? true,
-          createdAt: (data['createdAt'] as Timestamp).toDate(),
-          categories: List<String>.from(data['categories'] ?? []),
-          condition: data['condition'] ?? 'Good',
-          isbn: data['isbn'] ?? '',
-        );
-      }).toList();
+      return snapshot.docs.map((doc) => Book.fromFirestore(doc)).toList();
     } catch (e) {
       throw Exception('Failed to get books: $e');
     }
@@ -339,7 +365,7 @@ class FirebaseService {
 
   Future<void> markNotificationAsRead(String notificationId) async {
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = _firebaseAuth.currentUser?.uid;
       if (userId == null) throw Exception('User not authenticated');
 
       await _firestore
@@ -377,7 +403,7 @@ class FirebaseService {
 
   Future<void> deleteNotification(String notificationId) async {
     try {
-      final userId = _auth.currentUser?.uid;
+      final userId = _firebaseAuth.currentUser?.uid;
       if (userId == null) throw Exception('User not authenticated');
 
       await _firestore
@@ -464,8 +490,8 @@ class FirebaseService {
   // Reset password
   Future<void> resetPassword(String email) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on firebase_auth.FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'user-not-found':
           throw 'No user found with this email.';
@@ -478,51 +504,56 @@ class FirebaseService {
   }
 
   // Social Authentication Methods
-  Future<UserCredential> signInWithGoogle() async {
+  Future<firebase_auth.UserCredential> signInWithGoogle() async {
     try {
       if (kIsWeb) {
         // Web platform
-        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        firebase_auth.GoogleAuthProvider googleProvider = firebase_auth.GoogleAuthProvider();
         googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-        return await _auth.signInWithPopup(googleProvider);
+        return await _firebaseAuth.signInWithPopup(googleProvider);
       } else {
         // Mobile platform
-        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        final GoogleSignInAccount? googleUser = await _googleSignIn?.signIn();
         if (googleUser == null) throw 'Google sign in aborted';
 
         final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-        final credential = GoogleAuthProvider.credential(
+        final credential = firebase_auth.GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
 
-        final userCredential = await _auth.signInWithCredential(credential);
+        final userCredential = await _firebaseAuth.signInWithCredential(credential);
         if (userCredential.user != null) {
-          final user = UserModel(
+          final user = AppUser(
             id: userCredential.user!.uid,
             email: userCredential.user!.email!,
             name: userCredential.user!.displayName ?? '',
-            photoUrl: userCredential.user!.photoURL,
-            createdAt: DateTime.now(),
+            profileImage: userCredential.user!.photoURL,
+            rating: 0.0,
+            joinDate: DateTime.now(),
+            preferences: {
+              'notifications': true,
+              'emailNotifications': true,
+            },
           );
           await createUserProfile(user);
         }
         return userCredential;
       }
     } catch (e) {
-      print('Google Sign In Error: $e');
+      debugPrint('Google Sign In Error: $e');
       throw 'Failed to sign in with Google: $e';
     }
   }
 
-  Future<UserCredential> signInWithFacebook() async {
+  Future<firebase_auth.UserCredential> signInWithFacebook() async {
     try {
       if (kIsWeb) {
         // Web platform
-        FacebookAuthProvider facebookProvider = FacebookAuthProvider();
+        firebase_auth.FacebookAuthProvider facebookProvider = firebase_auth.FacebookAuthProvider();
         facebookProvider.addScope('email');
         facebookProvider.addScope('public_profile');
-        return await _auth.signInWithPopup(facebookProvider);
+        return await _firebaseAuth.signInWithPopup(facebookProvider);
       } else {
         // Mobile platform
         final LoginResult result = await _facebookAuth.login();
@@ -530,35 +561,40 @@ class FirebaseService {
           throw 'Facebook sign in failed';
         }
 
-        final OAuthCredential credential = FacebookAuthProvider.credential(
+        final firebase_auth.OAuthCredential credential = firebase_auth.FacebookAuthProvider.credential(
           result.accessToken!.token,
         );
 
-        final userCredential = await _auth.signInWithCredential(credential);
+        final userCredential = await _firebaseAuth.signInWithCredential(credential);
         if (userCredential.user != null) {
-          final user = UserModel(
+          final user = AppUser(
             id: userCredential.user!.uid,
             email: userCredential.user!.email!,
             name: userCredential.user!.displayName ?? '',
-            photoUrl: userCredential.user!.photoURL,
-            createdAt: DateTime.now(),
+            profileImage: userCredential.user!.photoURL,
+            rating: 0.0,
+            joinDate: DateTime.now(),
+            preferences: {
+              'notifications': true,
+              'emailNotifications': true,
+            },
           );
           await createUserProfile(user);
         }
         return userCredential;
       }
     } catch (e) {
-      print('Facebook Sign In Error: $e');
+      debugPrint('Facebook Sign In Error: $e');
       throw 'Failed to sign in with Facebook: $e';
     }
   }
 
-  Future<UserCredential> signInWithTwitter() async {
+  Future<firebase_auth.UserCredential> signInWithTwitter() async {
     try {
       if (kIsWeb) {
         // Web platform
-        TwitterAuthProvider twitterProvider = TwitterAuthProvider();
-        return await _auth.signInWithPopup(twitterProvider);
+        firebase_auth.TwitterAuthProvider twitterProvider = firebase_auth.TwitterAuthProvider();
+        return await _firebaseAuth.signInWithPopup(twitterProvider);
       } else {
         // Mobile platform
         final authResult = await _twitterLogin.login();
@@ -566,27 +602,39 @@ class FirebaseService {
           throw 'Twitter sign in failed';
         }
 
-        final OAuthCredential credential = TwitterAuthProvider.credential(
+        final firebase_auth.OAuthCredential credential = firebase_auth.TwitterAuthProvider.credential(
           accessToken: authResult.authToken!,
           secret: authResult.authTokenSecret!,
         );
 
-        final userCredential = await _auth.signInWithCredential(credential);
+        final userCredential = await _firebaseAuth.signInWithCredential(credential);
         if (userCredential.user != null) {
-          final user = UserModel(
+          final user = AppUser(
             id: userCredential.user!.uid,
             email: userCredential.user!.email!,
             name: userCredential.user!.displayName ?? '',
-            photoUrl: userCredential.user!.photoURL,
-            createdAt: DateTime.now(),
+            profileImage: userCredential.user!.photoURL,
+            rating: 0.0,
+            joinDate: DateTime.now(),
+            preferences: {
+              'notifications': true,
+              'emailNotifications': true,
+            },
           );
           await createUserProfile(user);
         }
         return userCredential;
       }
     } catch (e) {
-      print('Twitter Sign In Error: $e');
+      debugPrint('Twitter Sign In Error: $e');
       throw 'Failed to sign in with Twitter: $e';
     }
   }
+}
+
+// Background message handler
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint('Handling a background message: ${message.messageId}');
 } 

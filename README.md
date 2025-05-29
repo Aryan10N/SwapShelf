@@ -9,7 +9,7 @@ streamlines this process with features like login/signup, book listing, browsing
 requests, request management, and a review system—all built using Flutter and Dart with Firebase
 handling authentication, database, and cloud messaging. By making textbooks and other reading
 materials more accessible and affordable, this app promotes resource-sharing and collaboration
-among students within the college campus. It's not just a convenience tool—it’s a step toward
+among students within the college campus. It's not just a convenience tool—it's a step toward
 building a helpful, sustainable student community.
 
 
@@ -17,6 +17,33 @@ building a helpful, sustainable student community.
 
 ## 🚀 Features
 
+### Frontend Features
+- 🎨 **Modern UI Design** with consistent color scheme and styling
+- 👋 **Welcome Screen** with engaging introduction and clear call-to-action buttons
+- 🔐 **Login Screen** with:
+  - Clean form design
+  - Password visibility toggle
+  - Default credentials for testing
+  - Error handling with user-friendly messages
+- 🏠 **Home Screen** featuring:
+  - Search functionality for books
+  - Category filtering with horizontal scrollable chips
+  - Book grid display with cover images
+  - Book cards with title, author, and availability status
+  - Bottom navigation for easy access to different sections
+  - Profile access in app bar
+  - Add book floating action button
+- 📱 **Responsive Layout** that works on various screen sizes
+- 🎯 **Intuitive Navigation** between screens
+- 💫 **Smooth Animations** and transitions
+- 🎨 **Custom Components**:
+  - Custom form fields
+  - Custom buttons
+  - Error dialogs
+  - Loading overlays
+  - Section headers
+
+### Backend Features
 - 🔐 **Secure Authentication** using Firebase Auth (email/password)
 - 📸 **List Books** with title, author, description, and image upload
 - 🔍 **Browse & Search** books by title, author, or subject

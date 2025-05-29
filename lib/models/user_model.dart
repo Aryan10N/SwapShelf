@@ -1,89 +1,64 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserModel {
+class AppUser {
   final String id;
-  final String email;
   final String name;
-  final String? bio;
-  final String? location;
-  final String? profileImageUrl;
-  final String? photoUrl;
-  final DateTime createdAt;
-  final int booksShared;
-  final int booksReceived;
+  final String email;
+  final String? profileImage;
   final double rating;
+  final DateTime joinDate;
+  final Map<String, dynamic> preferences;
 
-  UserModel({
+  AppUser({
     required this.id,
-    required this.email,
     required this.name,
-    this.bio,
-    this.location,
-    this.profileImageUrl,
-    this.photoUrl,
-    required this.createdAt,
-    this.booksShared = 0,
-    this.booksReceived = 0,
-    this.rating = 0.0,
+    required this.email,
+    this.profileImage,
+    required this.rating,
+    required this.joinDate,
+    required this.preferences,
   });
 
-  factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return UserModel(
+  factory AppUser.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return AppUser(
       id: doc.id,
-      email: data['email'] ?? '',
       name: data['name'] ?? '',
-      bio: data['bio'],
-      location: data['location'],
-      profileImageUrl: data['profileImageUrl'],
-      photoUrl: data['photoUrl'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      booksShared: data['booksShared'] ?? 0,
-      booksReceived: data['booksReceived'] ?? 0,
+      email: data['email'] ?? '',
+      profileImage: data['profileImage'],
       rating: (data['rating'] ?? 0.0).toDouble(),
+      joinDate: (data['joinDate'] as Timestamp).toDate(),
+      preferences: data['preferences'] ?? {},
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'email': email,
       'name': name,
-      'bio': bio,
-      'location': location,
-      'profileImageUrl': profileImageUrl,
-      'photoUrl': photoUrl,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'booksShared': booksShared,
-      'booksReceived': booksReceived,
+      'email': email,
+      'profileImage': profileImage,
       'rating': rating,
+      'joinDate': Timestamp.fromDate(joinDate),
+      'preferences': preferences,
     };
   }
 
-  UserModel copyWith({
-    String? id,
-    String? email,
+  AppUser copyWith({
     String? name,
-    String? bio,
-    String? location,
-    String? profileImageUrl,
-    String? photoUrl,
-    DateTime? createdAt,
-    int? booksShared,
-    int? booksReceived,
+    String? email,
+    String? profileImage,
     double? rating,
+    DateTime? joinDate,
+    Map<String, dynamic>? preferences,
   }) {
-    return UserModel(
-      id: id ?? this.id,
-      email: email ?? this.email,
+    return AppUser(
+      id: id,
       name: name ?? this.name,
-      bio: bio ?? this.bio,
-      location: location ?? this.location,
-      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
-      photoUrl: photoUrl ?? this.photoUrl,
-      createdAt: createdAt ?? this.createdAt,
-      booksShared: booksShared ?? this.booksShared,
-      booksReceived: booksReceived ?? this.booksReceived,
+      email: email ?? this.email,
+      profileImage: profileImage ?? this.profileImage,
       rating: rating ?? this.rating,
+      joinDate: joinDate ?? this.joinDate,
+      preferences: preferences ?? this.preferences,
     );
   }
 } 
