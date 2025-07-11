@@ -165,6 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () {
               Navigator.pop(context);
               context.read<ProfileProvider>().logout();
+              context.read<AuthProvider>().signOutTest();
               Navigator.pushReplacementNamed(context, '/login');
             },
             child: const Text(

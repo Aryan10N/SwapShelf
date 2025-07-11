@@ -35,7 +35,14 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         final email = _emailController.text.trim();
         final password = _passwordController.text.trim();
-
+        // Allow default credentials (root/root) for testing without Firebase authentication
+        if (email == 'root' && password == 'root') {
+          context.read<AuthProvider>().signInTest();
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+          return;
+        }
         await context.read<AuthProvider>().signIn(email, password);
         
         if (mounted) {
@@ -143,6 +150,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
+                    if (value == 'root') {
+                      return null;
+                    }
                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                       return 'Please enter a valid email';
                     }
@@ -189,6 +199,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
+                    }
+                    if (value == 'root') {
+                      return null;
                     }
                     if (value.length < 6) {
                       return 'Password must be at least 6 characters';

@@ -9,11 +9,12 @@ class AuthProvider with ChangeNotifier {
   UserModel? _userModel;
   bool _isLoading = false;
   String? _error;
+  bool _isTestLogin = false; // Indicates test authentication using default credentials
 
   User? get user => _user;
   UserModel? get userModel => _userModel;
   bool get isLoading => _isLoading;
-  bool get isAuthenticated => _user != null;
+  bool get isAuthenticated => _user != null || _isTestLogin;
   String? get error => _error;
 
   AuthProvider() {
@@ -28,7 +29,18 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  String get currentUserId => _user?.uid ?? '';
+  String get currentUserId => _user?.uid ?? (_isTestLogin ? 'root' : '');
+  // --- Test Authentication Methods ---
+  void signInTest() {
+    // Mark as authenticated for testing without Firebase
+    _isTestLogin = true;
+    notifyListeners();
+  }
+
+  void signOutTest() {
+    _isTestLogin = false;
+    notifyListeners();
+  }
 
   Future<void> signIn(String email, String password) async {
     try {
